@@ -1,0 +1,11 @@
+{
+	"sonofind":{
+		"host":"https://www.sonofind.com/api/v2/",
+		"user":"testuser@sonoton.de",
+		"passwd":"123123"
+	},
+	"localstorage":{
+		"tokenfile": "apitoken.test.txt",
+		"mp3storage": "./MP3/"	
+	}
+}
