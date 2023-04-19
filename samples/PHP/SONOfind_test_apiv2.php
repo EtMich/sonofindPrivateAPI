@@ -23,36 +23,21 @@ $oTest->downloadTrack($trackcode);
 #$ret = $oTest->newTracks();
 
 /**
- * Test implementation using CURL module
+ * PHP class using CURL module
  * 
  * @author michael ettl
  *
  */
-
-$oTest=new testAPI($url);
-$oTest->openSession();
-$oTest->authenticate($user,$pw);
-
-#$oTest->getLabels();
-#$oTest->getCD('SCD');
-#$oTest->getTrack($trackcode);
-#$oTest->downloadTrack($trackcode);
-#$ret = $oTest->ackTrack($trackcode);
-$ret = $oTest->newTracks('FEXY');
-
-/**
- * Test implementation using CURL module
- * 
- * @author michael ettl
- *
- */
-
 class SONOfindAPI {
     
     protected $baseurl;
     protected $ch;
     protected $mode="GET";
     protected $response;
+    /**
+     * 
+     * @var SimpleXMLElement
+     */
     protected $xml;
     protected $sid='';
     
@@ -60,11 +45,22 @@ class SONOfindAPI {
         $this->baseurl=$url;
     }
     
+    /**
+     * query server
+     * @param array $aParams - POST parameters
+     * @param array $aGetParams - optional GET parameters
+     * @return SimpleXMLElement
+     */
     private function startCurl($aParams,$aGetParams=array()) {
         $this->initCurl($aParams,$aGetParams);
         return($this->executeCurl());
     }
     
+    /**
+     * 
+     * @param array $aParams - POST parameters
+     * @param array $aGetParams - optional GET parameters
+     */
     private function initCurl($aParams,$aGetParams=array()) {
         #echo "SID".$this->sid;
         #if($this->sid) {
@@ -101,6 +97,11 @@ class SONOfindAPI {
         }
     }
     
+    /**
+     * execute CURL query created by initCurl
+     * @throws Exception
+     * @return SimpleXMLElement
+     */
     private function executeCurl() {
         $this->response = curl_exec($this->ch);
         #echo $this->response;
@@ -128,6 +129,9 @@ class SONOfindAPI {
         echo $msg."\n";
     }
     
+    /**
+     * initiate session with sonoton server
+     */
     public function openSession() {
         $this->startCurl(array('ac'=>'opensession'));
         $result = $this->xml->xpath('/mmd/sid');
@@ -135,6 +139,12 @@ class SONOfindAPI {
         $this->debug( "SESSION-ID: ".$this->sid);
     }
     
+    /**
+     * authenticate with sonoton server
+     * 
+     * @param string $user
+     * @param string $pass
+     */
     public function authenticate($user='',$pass='') {
         $aParams['ac']='auth';
         $aParams['user']=$user;
@@ -144,6 +154,18 @@ class SONOfindAPI {
         #$result = $this->xml->xpath('/mmd/sid');
     }
     
+    /**
+     * 
+     * @param string $trackcode
+     * @return objct
+     */
+    
+    
+    /**
+     * 
+     * @param unknown $trackcode
+     * @return unknown
+     */
     public function getTrack($trackcode) {
         $aParams['ac']='mmd';
         $aParams['trackcode']=$trackcode;
@@ -153,8 +175,13 @@ class SONOfindAPI {
         $XMLtrack=$this->xml->track[0];
         echo "Track found: ".$XMLtrack->trackcode[0];
         echo "Track deactivated: ".$XMLtrack->deactivated[0]."\n";
+        return($XMLtrack);
     }
     
+    /**
+     * fetch labels available for download
+     * @return string[]
+     */
     public function getLabels() {
         $aParams['ac']='labels';
         $resp=$this->startCurl($aParams);
@@ -165,10 +192,15 @@ class SONOfindAPI {
         foreach ($XMLfiles as $files) {
             $aLabels[] = (string) $files[0];
         }
-        print_r($aLabels);
-        return($resp);
+        #print_r($aLabels);
+        return($aLabels);
     }
     
+    /**
+     * fetch list of albums available for this label
+     * @param string $label
+     * @return string[]
+     */
     public function getCD($label) {
         $aParams['ac']='cds';
         $aParams['label']=$label;
@@ -181,10 +213,15 @@ class SONOfindAPI {
         foreach ($XMLfiles as $files) {
             $aAlbumcode[] = (string) $files[0];
         }
-        print_r($aAlbumcode);
-        return($resp);
+        #print_r($aAlbumcode);
+        return($aAlbumcode);
     }
     
+    /**
+     * acknowledge receipt of track
+     * @param string $trackcode
+     * @return SimpleXMLElement
+     */
     public function ackTrack($trackcode) {
         $aParams['ac']='ack';
         $aParams['trackcode']=$trackcode;
@@ -192,6 +229,12 @@ class SONOfindAPI {
         return($resp);
     }
     
+    /**
+     * 
+     * Fetch newTracks
+     * @param string $label
+     * @return SimpleXMLElement
+     */
     public function newTracks($label="") {
         $aParams['ac']='newtracks';
     	if($label) {
@@ -201,10 +244,15 @@ class SONOfindAPI {
         $aGetParams['skipstems']=1;
         $resp=$this->startCurl($aParams,$aGetParams);
         $trackcodes= (array) $XMLtrack=$this->xml->trackcodes;
-        echo "List of new tracks: ".print_r($trackcodes,true)."\n";
+        #echo "List of new tracks: ".print_r($trackcodes,true)."\n";
         return($resp);
     }
     
+    /**
+     * Download audio for track
+     * @param string $trackcode
+     * @throws Exception
+     */
     public function downloadTrack($trackcode) {
         $this->getTrack($trackcode);
         $xPath="/mmd/track[@trackcode='$trackcode']/files/file[@content='audio']";
@@ -234,6 +282,5 @@ class SONOfindAPI {
             }
         }
     }
-    
     
 }
