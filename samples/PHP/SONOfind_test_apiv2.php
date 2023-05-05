@@ -5,6 +5,8 @@ $user="abc@abc.com";
 $pw="demo";
 
 $trackcode="SCD072005";
+$cdcode="SCD0720";
+
 if($_GET['trackcode']) {
     $trackcode=$_GET['trackcode'];
 }
@@ -17,6 +19,7 @@ $oTest->authenticate($user,$pw);
 
 #$oTest->getLabels();
 #$oTest->getCD('SCD');
+#$oTest->getAlbum($cdcode);
 #$oTest->getTrack($trackcode);
 $oTest->downloadTrack($trackcode);
 #$ret = $oTest->ackTrack($trackcode);
@@ -154,17 +157,28 @@ class SONOfindAPI {
         #$result = $this->xml->xpath('/mmd/sid');
     }
     
+    
+    /**
+     *
+     * @param string $cdcode
+     * @return object
+     */
+    public function getAlbum($cdcode) {
+        $aParams['ac']='mmd';
+        $aParams['trackcode']=$cdcode;
+        $this->startCurl($aParams);
+        $xPath="/mmd/cd";
+        $this->debug(print_r($this->xml,true));
+        $XMLcd=$this->xml->cd[0];
+        echo "Track found: ".$XMLcd->cd[0];
+        echo "Track deactivated: ".$XMLcd->deactivated[0]."\n";
+        return($XMLcd);
+    }
+    
     /**
      * 
      * @param string $trackcode
-     * @return objct
-     */
-    
-    
-    /**
-     * 
-     * @param unknown $trackcode
-     * @return unknown
+     * @return object
      */
     public function getTrack($trackcode) {
         $aParams['ac']='mmd';
@@ -256,7 +270,7 @@ class SONOfindAPI {
     public function downloadTrack($trackcode) {
         $this->getTrack($trackcode);
         $xPath="/mmd/track[@trackcode='$trackcode']/files/file[@content='audio']";
-        #[@quality='320']";
+        /* example for only 320k - .../file[@content='audio' and @quality='320']  */
         $XMLfiles = $this->xml->xpath($xPath);
         #print_r($XMLfiles);
         
@@ -284,3 +298,4 @@ class SONOfindAPI {
     }
     
 }
+?>
