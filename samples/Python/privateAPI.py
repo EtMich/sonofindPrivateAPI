@@ -1,5 +1,4 @@
 #!/usr/bin/python
-## Check if PARIGO files are there
 import os
 import json
 import urllib
@@ -48,17 +47,18 @@ if (False):
 	localdownload=data["localstorage"]["mp3storage"]
 
 	cdtrack = 'SCD0720'
-	tracks = sonofind.getTracks(cdtrack)
+	tracks = sonofind.getTrackDownloadUrl(cdtrack)
 	print("Tracks of {}:\n{}\n".format(cdtrack,tracks))
 
 	for track in tracks:
-		dlurl = track[1]
-		dlfile = localdownload+track[0]+".mp3"
+		dlurl = track.get("url")
+		trackcode = track.get("trackcode")
+		dlfile = localdownload+trackcode+".mp3"
 		print("Download {} from {}".format(dlfile,dlurl))
 		sonofind.downloadFile(dlurl,dlfile)
 		## acknowledge receipt
-		print("Ack delivery: "+track[0])
-		sonofind.ack(track[0])
+		print("Ack delivery: "+trackcode)
+		sonofind.ack(trackcode)
 
 ## DEMO for fetching all new tracks (which are not yet acknowledged
 if (True):
