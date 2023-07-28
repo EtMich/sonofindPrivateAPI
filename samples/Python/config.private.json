@@ -2,7 +2,8 @@
 	"sonofind":{
 		"host":"https://www.sonofind.com/api/v2/",
 		"user":"testuser@sonoton.de",
-		"passwd":"123123"
+		"passwd":"123123",
+		"tracklimit": 10
 	},
 	"localstorage":{
 		"tokenfile": "apitoken.test.txt",
